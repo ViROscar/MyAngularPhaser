@@ -84,6 +84,7 @@ La estructura que utilizo es la siguiente:
     }
 ]
 ```
+
 `Name` sera el nombre del escenario. este campo servira como referencia para la consulta.
 
 `InitialLocation` es la posicion inicial en el escenario.
@@ -94,4 +95,86 @@ La estructura que utilizo es la siguiente:
 
 `Points` es un arreglo con los puntos a recolectar en el escenario.
 
+## Angular
 
+Se crea el servicio `ctrlphs` (Es preferible escoger otro nombre ya que este no es descriptivo)
+
+```
+ng generate service ctrlphs 
+```
+
+y se crea el componente `game`
+
+```
+ng generate component game
+```
+
+Tambien se crearan las siguientes interfaces 
+
+```
+DataScene.ts
+
+GameLocation.ts
+
+Platform.ts
+
+Enemy.ts
+
+Point.ts
+```
+
+Estas serviran para almacenar la informacion consultada en `MyFile.json` 
+
+### DataScene.ts
+
+```
+import { Platform } from './Platform';
+import { GameLocation } from './GameLocation';
+import { Enemy } from './Enemy';
+import { Point } from './Point';
+
+export interface DataScene{
+    Name:string;
+    InitialLocation:GameLocation;
+    Platforms:Platform[];
+    Enemies:Enemy[];
+    Points:Point[];
+}
+```
+
+### GameLocation.ts
+
+```
+export interface GameLocation{
+    x:number;
+    y:number;
+}
+```
+
+### Platform.ts
+
+```
+export interface Platform{
+    x:number;
+    y:number;
+    width:number;
+}
+```
+
+### Enemy.ts
+
+```
+export interface Enemy{
+    x:number;
+    y:number;
+}
+```
+
+### Point.ts
+
+```
+export interface Point{
+    x:number;
+    y:number;
+}
+```
