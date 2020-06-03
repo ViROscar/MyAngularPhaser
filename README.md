@@ -1,4 +1,7 @@
 # MyAngularPhaser
+
+**Ejecutar:** https://viroscar.github.io/MyAngularPhaser/
+
 El motivo principal de realizar este proyecto es aprender un poco angular.
 
 Usualmente cuando se aprende una nueva tecnología (Al menos los casos que me han tocado ver para aplicaciones web) se suelen hace formularios donde el usuario puede realizar consultas a múltiples registros ademas de poder agregar, editar y eliminar. 
