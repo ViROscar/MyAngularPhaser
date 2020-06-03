@@ -342,3 +342,247 @@ export class GameComponent implements OnInit {
 }
 ```
 
+### game.component.html
+
+Para el template del componente se crea un contenedor con el id `gameContainer` que sera donde se pintara el escenario del juego y se agregaran lo dos botones (`scene a` y `scene b`) que serviran para llamar al metodo `callScene` y cargar  el escenario.
+
+**Codigo:**
+
+```
+<section class="gameSection">
+    <div id="gameContainer">    
+    </div>
+</section>
+<section>
+    <button (click)="callScene('sceneA')">scene a</button>
+    <button (click)="callScene('sceneB')">scene b</button>
+</section>
+```
+
+## Phaser
+
+### MainScene.ts
+
+**Codigo:**
+```
+import { CustomObject} from './CustomObject';
+import { EnemyObject } from './EnemyObject';
+import { PointsObject } from './PointObject';
+import { TextObject } from './TextObject';
+import { DataScene } from './DataScene';
+import { Enemy } from './Enemy';
+import { Platform } from './Platform';
+import { Point } from './Point';
+
+export class MainScene extends Phaser.Scene {
+    private square: CustomObject;
+    private platforms: Phaser.Physics.Arcade.StaticGroup;
+    private commonFoes: Phaser.GameObjects.Group;
+    private points: Phaser.GameObjects.Group;
+    private texts: Phaser.GameObjects.Group;
+    private currentDataScene: DataScene;
+
+    constructor(dataScene: DataScene){
+        super({key : dataScene.Name});
+        this.currentDataScene = dataScene;
+    }
+
+    create(){
+        this.platforms = this.physics.add.staticGroup();
+        this.commonFoes = this.add.group();
+        this.points = this.add.group();
+        this.texts = this.add.group();
+        
+        this.square = new CustomObject(this.scene.scene,
+            this.currentDataScene.InitialLocation.x,
+            this.currentDataScene.InitialLocation.y,
+            100,
+            100,
+            0x0074ff);
+        this.loadPlatforms(this.currentDataScene.Platforms);
+        this.loadEnemies(this.currentDataScene.Enemies);
+        this.loadPoints(this.currentDataScene.Points);
+        this.texts.add(new TextObject(this.scene.scene,0,0,(() => {return  `Score: ${this.square.personalScore} Health: ${this.square.health}`}),{fontSize: '16px', color: '#000'}));
+    }
+
+    preload(){
+
+    }
+
+    update(){
+
+    }
+
+    private loadEnemies(enemies: Enemy[]){
+        for(let enemy of enemies){
+            this.commonFoes.add(new EnemyObject(this.scene.scene, enemy.x,enemy.y,50,50,0x940900,this.square));
+        }
+    }
+
+    private loadPlatforms(platforms: Platform[]){
+        for(let platform of platforms){
+            this.platforms.add(this.add.rectangle(platform.x, platform.y, platform.width, 100, 0x00b940).setOrigin(0,0));
+        }
+
+        this.physics.add.collider(this.square,this.platforms);
+    }
+
+    private loadPoints(points: Point[]){
+        for(let point of points){
+            this.points.add(new PointsObject(this.scene.scene,point.x,point.y,50,50,0xfff237,this.square));
+        }
+    }
+}
+
+```
+
+### CustomObject.ts
+
+**Codigo:**
+
+```
+export class CustomObject extends Phaser.GameObjects.Rectangle {
+    private objectCursors: Phaser.Types.Input.Keyboard.CursorKeys;
+    private initialX:integer;
+    private initialY:integer;
+
+    private _personalScore: integer;
+    private _health:integer;
+    
+
+    public get personalScore() : integer {
+        if(this._personalScore === undefined){
+            this._personalScore=0;
+        }
+        return this._personalScore;
+    }
+
+    public set personalScore(v : integer) {
+        this._personalScore = v;
+    }
+
+    
+    public get health() : integer {
+        if(this._health === undefined){
+            this._health=3;
+        }
+        return this._health;
+    }
+
+    
+    public set health(v : integer) {
+        this._health = v;
+    }
+    
+    
+    
+    constructor(scene: Phaser.Scene, x, y, width, height, fillColor) {
+        super(scene, x, y, width, height, fillColor);
+        scene.add.existing(this);
+        scene.physics.add.existing(this);
+        (<Phaser.Physics.Arcade.Body>this.body).setCollideWorldBounds(true);
+        this.objectCursors = scene.input.keyboard.createCursorKeys();
+        this.setOrigin(0,0);
+        this.initialX = x;
+        this.initialY = y;
+    }
+
+    preUpdate(time, delta) {
+        
+        this.movement();
+
+        this.checkHealth();
+    }
+
+    getDamage(dmg :integer){
+        this.health -= dmg;
+        this.setPosition(this.initialX,this.initialY);
+    }
+
+    private checkHealth(){
+        if(this.health <= 0){
+            console.log(":[")
+            this.destroy();
+        }
+    }
+
+    private movement() {
+        if (this.objectCursors.left.isDown) {
+            (<Phaser.Physics.Arcade.Body>this.body).setVelocityX(-160);
+        }
+        else if (this.objectCursors.right.isDown) {
+            (<Phaser.Physics.Arcade.Body>this.body).setVelocityX(160);
+        }
+        else {
+            (<Phaser.Physics.Arcade.Body>this.body).setVelocityX(0);
+        }
+
+        if (this.objectCursors.up.isDown && (<Phaser.Physics.Arcade.Body>this.body).touching.down) {
+            (<Phaser.Physics.Arcade.Body>this.body).setVelocityY(-300);
+        }
+    }
+}
+```
+
+
+### EnemyObject.ts
+
+**Codigo:**
+```
+import { CustomObject } from './CustomObject';
+
+export class EnemyObject extends Phaser.GameObjects.Rectangle {
+
+    constructor(scene: Phaser.Scene, x, y, width, height, fillColor, playerRef: Phaser.GameObjects.GameObject) {
+        super(scene, x, y, width, height, fillColor);
+        scene.add.existing(this);
+        scene.physics.add.existing(this);
+        (<Phaser.Physics.Arcade.Body>this.body).allowGravity=false;
+        this.setOrigin(0,0);
+        scene.physics.add.overlap(playerRef,this,this.overlapAction,null,null);
+    }
+
+    preUpdate(time, delta) {
+
+    }
+
+    private overlapAction(referenced: Phaser.GameObjects.GameObject,that : EnemyObject){
+        if(referenced instanceof CustomObject){
+            (<CustomObject>referenced).getDamage(1);
+        }
+        
+    }
+
+}
+```
+
+### PointsObject.ts
+
+**Codigo:**
+
+```
+import { CustomObject } from './CustomObject';
+
+export class PointsObject extends Phaser.GameObjects.Rectangle {
+    constructor(scene: Phaser.Scene, x, y, width, height, fillColor,playerRef: Phaser.GameObjects.GameObject) {
+        super(scene, x, y, width, height, fillColor);
+        scene.add.existing(this);
+        scene.physics.add.existing(this);
+        (<Phaser.Physics.Arcade.Body>this.body).allowGravity=false;
+        this.setOrigin(0,0);
+        scene.physics.add.overlap(playerRef,this,this.overlapAction,null,null);
+    }
+
+    preUpdate(time, delta) {
+
+    }
+
+    private overlapAction(referenced:Phaser.GameObjects.GameObject,that : PointsObject){
+        if(referenced instanceof CustomObject){
+            (<CustomObject>referenced).personalScore += 100;
+            that.destroy();
+        }
+    }
+
+}
+```
