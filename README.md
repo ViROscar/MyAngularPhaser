@@ -222,6 +222,66 @@ export class CtrlphsService {
 
 ### game.component.ts
 
+En el componente se agregaran los siguientes elementos:
+
+```
+phaserGame: Phaser.Game;
+config: Phaser.Types.Core.GameConfig;
+```
+
+`phaserGame: Phaser.Game` almacenara la referencia al juego.
+`config: Phaser.Types.Core.GameConfig` almacenara la configuracion que requiere phaser para el juego.
+
+```
+constructor(private ctrlphsService:CtrlphsService) { 
+    this.config = {
+      type: Phaser.AUTO,
+      height: 600,
+      width: 800,
+      parent: 'gameContainer',
+      backgroundColor: '#dddddd',
+      physics: {
+        default: 'arcade',
+        arcade:{
+          gravity:{y:300}
+        }
+      }
+    };
+  }
+```
+
+En el constructor se inyecta el servicio `ctrlphs` y ademas se asignan los valores a `config`
+
+En los valores que importan para el lado de angular dentro de `config` es `parent` ya que este es el id del elemento html que servira como contenedor del juego.
+
+```
+  ngOnInit(): void {
+    this.phaserGame = new Phaser.Game(this.config);
+  }
+```
+
+En `ngOnInit` se inicializara `phaserGame` con la configuracion en `config`
+
+```
+  callScene(sceneName:string){
+    this.loadScene(sceneName);
+  }
+
+  private loadScene(sceneName:string){
+    this.ctrlphsService.getData(sceneName).subscribe(x => {
+      if(this.phaserGame.scene.getScenes(true).length){
+        let nm=this.phaserGame.scene.getScenes(true)[0].scene.key;
+        this.phaserGame.scene.stop(nm);
+        this.phaserGame.scene.remove(nm);
+      }
+      this.phaserGame.scene.add(sceneName,new MainScene(x));
+      this.phaserGame.scene.start(sceneName);
+    });
+  }
+```
+
+`callScene` sera el metodo se encargara de llamar al metodo `loadScene` con el que se desplegara el escenario del juego
+
 
 **Codigo:**
 
