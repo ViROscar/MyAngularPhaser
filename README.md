@@ -361,7 +361,37 @@ Para el template del componente se crea un contenedor con el id `gameContainer` 
 
 ## Phaser
 
+Para cargar el juego se utilizaran los objetos de Phaser.
+
+Ellos tienen un excelente tutorial en su sitio (https://phaser.io/tutorials/making-your-first-phaser-3-game/part1).
+
+Para este proyecto trato de diseñarlo como un entorno de programacion orientada a objetos y se crean los siguientes objetos:
+
+`MainScene`: Objeto para reprecentar la escena.
+
+`CustomObject`: Objeto para reprecentar al jugador. Implementa a `implementa a Phaser.GameObjects.Rectangle`.
+
+`EnemyObject`: Objeto para reprecentar al enemigo. Implementa a `implementa a Phaser.GameObjects.Rectangle`.
+
+`PointsObject`: Objeto para reprecentar los puntos. Implementa a `implementa a Phaser.GameObjects.Rectangle`.
+
+
 ### MainScene.ts
+
+Este objeto reprecenta una escena y extiende de `Phaser.Scene`. Contiene los siguientes metodos:
+
+`create()`: Este metodo se debe de implementar. Aqui se inicializa al jugador `CustomObject` y mandara a llamar los metodos `loadEnemies`, `loadPlatforms` y `loadPoints`.
+
+`preload()`: Este metodo se debe de implementar. No se utiliza para este proyecto ya que no se cargan recursos externos.
+
+`update()`: Este metodo se debe de implementar. No se utilizara ya que en los objetos 
+
+`private loadEnemies(enemies: Enemy[])`: Este metodo cargara objetos de la clase `EnemyObject` 
+
+`private loadPoints(points: Point[])`: Este metodo cargara objetos de la clase `PointsObject`
+
+`private loadPlatforms(platforms: Platform[])`: Este metodo cargara objetos de la clase `Phaser.GameObjects.Rectangle` que funcionaran como plataformas.
+
 
 **Codigo:**
 ```
